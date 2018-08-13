@@ -6,10 +6,12 @@ import (
 	"log"
 	"io"
 	"github.com/discordapp/lilliput"
-	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/aws"
+	"gopkg.in/h2non/bimg.v1"
+	"fmt"
+	"os"
 )
 
 
@@ -24,7 +26,21 @@ type Response struct {
 }
 
 func main() {
-	lambda.Start(HandleRequest)
+	//lambda.Start(HandleRequest)
+
+	buffer, err := bimg.Read("image.jpg")
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+	}
+
+	newImage, err := bimg.NewImage(buffer).Convert(bimg.WEBP)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+	}
+
+	if bimg.NewImage(newImage).Type() == "webp" {
+		fmt.Fprintln(os.Stderr, "The image was converted into webp")
+	}
 }
 
 func HandleRequest(ctx context.Context, r Request) (Response, error) {
